@@ -108,7 +108,6 @@ class AuthProvider extends ChangeNotifier {
         name: name,
         email: email,
         password: password,
-        phone: phone,
       );
       
       if (user != null) {

@@ -5,182 +5,198 @@ import '../models/product_model.dart';
 import '../models/order_model.dart';
 import '../utils/constants.dart';
 
-/// Serviço para comunicação com a API Django
 class ApiService {
   String? _authToken;
 
-  /// Define o token de autenticação
+  /// Seta o token JWT retornado pelo Django
   void setAuthToken(String token) {
     _authToken = token;
   }
 
-  /// Remove o token de autenticação
+  /// Limpa token
   void clearAuthToken() {
     _authToken = null;
   }
 
-  /// Headers padrão para requisições
+  /// Headers usados em todas requests
   Map<String, String> get _headers {
     final headers = {
       'Content-Type': 'application/json',
     };
-    
+
     if (_authToken != null) {
       headers['Authorization'] = 'Bearer $_authToken';
     }
-    
+
     return headers;
   }
 
-  /// Realiza login do usuário
+  // ----------------------------
+  // LOGIN
+  // ----------------------------
+
   Future<UserModel?> login(String email, String password) async {
     try {
       final url = Uri.parse(AppConstants.loginEndpoint);
+
       final response = await http.post(
         url,
         headers: _headers,
-        body: json.encode({
-          'email': email,
-          'password': password,
+        body: jsonEncode({
+          "username": email,
+          "password": password,
         }),
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(response.body);
         final user = UserModel.fromJson(data);
-        
-        // Armazena o token
+
         if (user.token != null) {
           setAuthToken(user.token!);
         }
-        
+
         return user;
       } else {
-        throw Exception('Falha no login: ${response.statusCode}');
+        print("LOGIN ERROR: ${response.body}");
+        return null;
       }
     } catch (e) {
-      print('Erro no login: $e');
+      print("Erro no login: $e");
       return null;
     }
   }
 
-  /// Registra um novo usuário
+  // ----------------------------
+  // REGISTRO
+  // ----------------------------
+
   Future<UserModel?> register({
     required String name,
     required String email,
     required String password,
-    String? phone,
   }) async {
     try {
       final url = Uri.parse(AppConstants.registerEndpoint);
+
       final response = await http.post(
         url,
         headers: _headers,
-        body: json.encode({
-          'name': name,
-          'email': email,
-          'password': password,
-          'phone': phone,
+        body: jsonEncode({
+          "name": name,
+          "email": email,
+          "password": password,
         }),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(response.body);
         final user = UserModel.fromJson(data);
-        
-        // Armazena o token
+
         if (user.token != null) {
           setAuthToken(user.token!);
         }
-        
+
         return user;
       } else {
-        throw Exception('Falha no registro: ${response.statusCode}');
+        print("REGISTER ERROR: ${response.body}");
+        return null;
       }
     } catch (e) {
-      print('Erro no registro: $e');
+      print("Erro no registro: $e");
       return null;
     }
   }
 
-  /// Busca todos os produtos
+  // ----------------------------
+  // PRODUTOS
+  // ----------------------------
+
   Future<List<ProductModel>> getProducts() async {
     try {
       final url = Uri.parse(AppConstants.productsEndpoint);
+
       final response = await http.get(url, headers: _headers);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List<dynamic>;
+        final data = jsonDecode(response.body) as List<dynamic>;
+
         return data
-            .map((item) => ProductModel.fromJson(item as Map<String, dynamic>))
+            .map((p) => ProductModel.fromJson(p))
             .toList();
       } else {
-        throw Exception('Falha ao buscar produtos: ${response.statusCode}');
+        print("Erro ao obter produtos: ${response.body}");
+        return [];
       }
     } catch (e) {
-      print('Erro ao buscar produtos: $e');
+      print("Erro ao buscar produtos: $e");
       return [];
     }
   }
 
-  /// Busca produtos por categoria
   Future<List<ProductModel>> getProductsByCategory(String category) async {
     try {
-      final url = Uri.parse('${AppConstants.productsEndpoint}?category=$category');
+      final url = Uri.parse("${AppConstants.productsEndpoint}?category=$category");
+
       final response = await http.get(url, headers: _headers);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List<dynamic>;
-        return data
-            .map((item) => ProductModel.fromJson(item as Map<String, dynamic>))
-            .toList();
+        final data = jsonDecode(response.body) as List<dynamic>;
+
+        return data.map((p) => ProductModel.fromJson(p)).toList();
       } else {
-        throw Exception('Falha ao buscar produtos: ${response.statusCode}');
+        print("Erro ao filtrar produtos: ${response.body}");
+        return [];
       }
     } catch (e) {
-      print('Erro ao buscar produtos por categoria: $e');
+      print("Erro no filtro de produtos: $e");
       return [];
     }
   }
 
-  /// Cria um novo pedido
+  // ----------------------------
+  // PEDIDOS
+  // ----------------------------
+
   Future<OrderModel?> createOrder(OrderModel order) async {
     try {
       final url = Uri.parse(AppConstants.ordersEndpoint);
+
       final response = await http.post(
         url,
         headers: _headers,
-        body: json.encode(order.toJson()),
+        body: jsonEncode(order.toJson()),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(response.body);
         return OrderModel.fromJson(data);
       } else {
-        throw Exception('Falha ao criar pedido: ${response.statusCode}');
+        print("Erro ao criar pedido: ${response.body}");
+        return null;
       }
     } catch (e) {
-      print('Erro ao criar pedido: $e');
+      print("Erro no createOrder: $e");
       return null;
     }
   }
 
-  /// Busca pedidos do usuário
   Future<List<OrderModel>> getOrders() async {
     try {
       final url = Uri.parse(AppConstants.ordersEndpoint);
+
       final response = await http.get(url, headers: _headers);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List<dynamic>;
-        return data
-            .map((item) => OrderModel.fromJson(item as Map<String, dynamic>))
-            .toList();
+        final data = jsonDecode(response.body) as List<dynamic>;
+
+        return data.map((o) => OrderModel.fromJson(o)).toList();
       } else {
-        throw Exception('Falha ao buscar pedidos: ${response.statusCode}');
+        print("Erro ao obter pedidos: ${response.body}");
+        return [];
       }
     } catch (e) {
-      print('Erro ao buscar pedidos: $e');
+      print("Erro no getOrders: $e");
       return [];
     }
   }
