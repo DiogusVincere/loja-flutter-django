@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:email_validator/email_validator.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
@@ -18,13 +17,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -37,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     final success = await authProvider.login(
-      _emailController.text.trim(),
+      _usernameController.text.trim(),  // <-- agora envia USERNAME
       _passwordController.text,
     );
 
@@ -73,13 +72,13 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 60),
                 
-                // Logo e título
                 Icon(
                   Icons.restaurant_menu,
                   size: 80,
                   color: AppTheme.primaryColor,
                 ),
                 const SizedBox(height: 16),
+
                 Text(
                   'Mange Eats',
                   textAlign: TextAlign.center,
@@ -89,6 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                 ),
                 const SizedBox(height: 8),
+
                 Text(
                   'Seu delivery favorito',
                   textAlign: TextAlign.center,
@@ -98,32 +98,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 48),
                 
-                // Campo de email
+                // 🔥 CAMPO USERNAME (corrigido)
                 CustomTextField(
                   label: 'Email',
-                  hint: 'Digite seu email',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  hint: 'Digite seu Email',
+                  controller: _usernameController,
+                  prefixIcon: const Icon(Icons.person_outline),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Digite seu email';
+                      return 'Digite seu Email';
                     }
-                    if (!EmailValidator.validate(value)) {
-                      return 'Digite um email válido';
+                    if (value.length < 3) {
+                      return 'Username deve ter pelo menos 3 caracteres';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 
-                // Campo de senha
+                // Campo senha
                 CustomTextField(
                   label: 'Senha',
                   hint: 'Digite sua senha',
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  prefixIcon: const Icon(Icons.lock_outlined),
+                  prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -148,7 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
                 
-                // Botão de login
                 CustomButton(
                   text: 'Entrar',
                   onPressed: _handleLogin,
@@ -156,7 +154,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 
-                // Link para cadastro
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

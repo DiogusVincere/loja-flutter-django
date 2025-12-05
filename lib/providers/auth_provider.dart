@@ -64,13 +64,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Realiza o login
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String username, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final user = await _apiService.login(email, password);
+      final user = await _apiService.login(username, password);
       
       if (user != null) {
         _user = user;

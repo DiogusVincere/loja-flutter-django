@@ -24,7 +24,9 @@ class ProductModel {
       id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String,
-      price: (json['price'] as num).toDouble(),
+      price: json['price'] is String
+          ? double.parse(json['price'])
+          : (json['price'] as num).toDouble(),
       category: json['category'] as String,
       imageUrl: json['image_url'] as String?,
       isAvailable: json['is_available'] as bool? ?? true,
