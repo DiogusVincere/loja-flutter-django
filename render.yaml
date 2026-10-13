@@ -1,0 +1,19 @@
+# Blueprint do Render para a API Django (pasta backend/).
+# O banco é SQLite no disco do serviço: no plano gratuito ele é apagado a cada
+# deploy, por isso o start roda migrate e seed_demo antes de subir o gunicorn.
+services:
+  - type: web
+    name: loja-flutter-django-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && python manage.py migrate && python manage.py seed_demo && gunicorn core.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
