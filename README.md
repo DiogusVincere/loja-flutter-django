@@ -106,6 +106,9 @@ Credenciais públicas de propósito, só para testar. Para um administrador, use
 
 ## Demonstração
 
+- **Web:** <https://diogusvincere.github.io/loja-flutter-django/> — publicada pelo workflow [`web.yml`](.github/workflows/web.yml) a cada push na `main`, depois que o GitHub Pages for ligado (Settings > Pages > Source: GitHub Actions). O app aparece numa moldura de celular; `…/loja-flutter-django/app/` abre em tela cheia. Aponta para a API no Render (`https://loja-flutter-django-api.onrender.com/api`), que dorme sem uso e leva uns 30 s para acordar.
+- **APK:** na página de [Releases](https://github.com/DiogusVincere/loja-flutter-django/releases) (gerado pelo workflow [`apk.yml`](.github/workflows/apk.yml) a cada tag `v*`; cada execução também deixa o APK como artefato). O APK é assinado com a chave de debug: instala em qualquer aparelho Android, mas não serve para a Play Store.
+
 <!-- prints: adicionar -->
 
 ## Licença
